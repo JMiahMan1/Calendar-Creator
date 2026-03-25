@@ -1,24 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CalendarGrid from './components/CalendarGrid';
 import { parseICSFile, fetchICSFeed } from './utils/icsHandler';
 import { exportToExcel } from './utils/excelExport';
 import './App.css';
 
 function App() {
-  const [events, setEvents] = useState([]);
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 1)); // Default: January 2026
-  const [feedUrl, setFeedUrl] = useState('');
+  const loadState = (key, defaultVal) => {
+    try {
+      const item = window.localStorage.getItem(`calendar_${key}`);
+      return item ? JSON.parse(item) : defaultVal;
+    } catch (e) { return defaultVal; }
+  };
+
+  const [events, setEvents] = useState(() => loadState('events', []));
+  const [currentDate, setCurrentDate] = useState(() => {
+    const saved = loadState('currentDate', null);
+    return saved ? new Date(saved) : new Date(2026, 0, 1);
+  });
+  const [feedUrl, setFeedUrl] = useState(() => loadState('feedUrl', ''));
   const [isLoading, setIsLoading] = useState(false);
   const [selectedEventIds, setSelectedEventIds] = useState([]);
 
   // Theming & Customization State
-  const [calendarTitle, setCalendarTitle] = useState('Office Calendar');
-  const [headerImage, setHeaderImage] = useState(null);
-  const [themeColors, setThemeColors] = useState({ primary: '#000000', text: '#000000', secondary: '#666666', border: '#cccccc' });
-  const [blankBlockColor, setBlankBlockColor] = useState('#fafafa');
-  const [dayBlockColor, setDayBlockColor] = useState('#ffffff');
-  const [orientation, setOrientation] = useState('landscape');
-  const [globalFontSize, setGlobalFontSize] = useState(10);
+  const [calendarTitle, setCalendarTitle] = useState(() => loadState('title', 'Office Calendar'));
+  const [headerImage, setHeaderImage] = useState(() => loadState('image', null));
+  const [themeColors, setThemeColors] = useState(() => loadState('theme', { primary: '#000000', text: '#000000', secondary: '#666666', border: '#cccccc' }));
+  const [blankBlockColor, setBlankBlockColor] = useState(() => loadState('blankColor', '#fafafa'));
+  const [dayBlockColor, setDayBlockColor] = useState(() => loadState('dayColor', '#ffffff'));
+  const [orientation, setOrientation] = useState(() => loadState('orientation', 'landscape'));
+  const [globalFontSize, setGlobalFontSize] = useState(() => loadState('fontSize', 10));
+
+  // Automatically save state on change
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('calendar_events', JSON.stringify(events));
+      window.localStorage.setItem('calendar_currentDate', JSON.stringify(currentDate));
+      window.localStorage.setItem('calendar_feedUrl', JSON.stringify(feedUrl));
+      window.localStorage.setItem('calendar_title', JSON.stringify(calendarTitle));
+      window.localStorage.setItem('calendar_theme', JSON.stringify(themeColors));
+      window.localStorage.setItem('calendar_blankColor', JSON.stringify(blankBlockColor));
+      window.localStorage.setItem('calendar_dayColor', JSON.stringify(dayBlockColor));
+      window.localStorage.setItem('calendar_orientation', JSON.stringify(orientation));
+      window.localStorage.setItem('calendar_fontSize', JSON.stringify(globalFontSize));
+      if (headerImage) window.localStorage.setItem('calendar_image', JSON.stringify(headerImage));
+      else window.localStorage.removeItem('calendar_image');
+    } catch(e) {
+      console.warn("localStorage quota exceeded (maybe image is too large)", e);
+    }
+  }, [events, currentDate, feedUrl, calendarTitle, headerImage, themeColors, blankBlockColor, dayBlockColor, orientation, globalFontSize]);
 
   /**
    * Smart Merge: Adds new events or updates existing ones.
