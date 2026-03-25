@@ -59,12 +59,12 @@ export const fetchICSFeed = async (url) => {
   // Determine which proxy to use
   let fetchUrl;
   if (cleanUrl.includes('calendar.planningcenteronline.com')) {
-    // Uses the proxy configured in vite.config.js
+    // Legacy support for PCO proxy if needed
     const urlPath = cleanUrl.split('calendar.planningcenteronline.com')[1];
     fetchUrl = '/pco-proxy' + urlPath;
   } else {
-    // Fallback for other domains
-    fetchUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(cleanUrl)}`;
+    // Unconditionally route all web feeds through our dedicated Node Express backend proxy
+    fetchUrl = `/api/proxy/ical?url=${encodeURIComponent(cleanUrl)}`;
   }
   
   try {

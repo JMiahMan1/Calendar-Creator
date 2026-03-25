@@ -9,12 +9,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
     "date-fns": "^3.6.0",
     "exceljs": "^4.4.0",
+    "express": "^5.2.1",
     "file-saver": "^2.0.5",
     "ical.js": "^1.5.0",
+    "jsonwebtoken": "^9.0.3",
+    "node-ical": "^0.25.6",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.13.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

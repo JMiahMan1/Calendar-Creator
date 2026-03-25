@@ -12,6 +12,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/pco-proxy/, '')
+      },
+      // Route all backend API requests to our new Node/SQLite server proxy
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
       }
     }
   }

@@ -98,8 +98,6 @@ input[type="text"], input[type="number"], select, textarea {
 /* THE PAPER CONTAINER - FIXED DIMENSIONS */
 .print-container { 
   background: white; 
-  width: 11in; 
-  height: 8.5in; /* LOCKS THE HEIGHT */
   padding: 0.3in; 
   display: flex; 
   flex-direction: column; 
@@ -107,19 +105,36 @@ input[type="text"], input[type="number"], select, textarea {
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   overflow: hidden; 
 }
+.print-container.landscape { width: 11in; height: 8.5in; }
+.print-container.portrait { width: 8.5in; height: 11in; }
+
+.header-image-container {
+  width: 100%;
+  height: 120px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.header-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .main-header { text-align: center; margin-bottom: 10px; flex-shrink: 0; }
-.main-header h1 { margin: 0; font-size: 24pt; color: #000; }
-.main-header h2 { margin: 0; font-size: 11pt; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+.main-header h1 { margin: 0; font-size: 24pt; color: var(--theme-text, #000); }
+.main-header h2 { margin: 0; font-size: 11pt; color: var(--theme-secondary, #666); text-transform: uppercase; letter-spacing: 2px; }
 
 /* THE GRID - FLEX GROW TO FILL PAPER HEIGHT */
 .calendar-grid { 
   display: grid; 
   grid-template-columns: repeat(7, minmax(0, 1fr)); 
   flex-grow: 1; 
-  border-top: 1px solid #ccc; 
-  border-left: 1px solid #ccc; 
+  border-top: 1px solid var(--theme-border, #ccc); 
+  border-left: 1px solid var(--theme-border, #ccc); 
   min-height: 0; 
+  border-radius: 4px;
 }
 
 /* Force equal row heights regardless of imports */
@@ -132,30 +147,47 @@ input[type="text"], input[type="number"], select, textarea {
 }
 
 .day-label { 
-  background: #f0f0f0; 
-  border-right: 1px solid #ccc; 
-  border-bottom: 1px solid #ccc; 
+  background: var(--theme-text, #f0f0f0); 
+  color: white; 
+  border-right: 1px solid var(--theme-border, #ccc); 
+  border-bottom: 2px solid var(--theme-text, #ccc); 
   font-size: 10px; 
   text-align: center; 
-  padding: 4px; 
+  padding: 6px 4px; 
   font-weight: bold; 
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .calendar-day { 
-  border-right: 1px solid #ccc; 
-  border-bottom: 1px solid #ccc; 
+  border-right: 1px solid var(--theme-border, #ccc); 
+  border-bottom: 1px solid var(--theme-border, #ccc); 
   padding: 5px; 
   display: flex; 
   flex-direction: column; 
-  background: #ffffff; 
+  background: var(--active-bg, #ffffff); 
   overflow: hidden; /* HIDES OVERFLOW TO KEEP HEIGHT STABLE */
   min-height: 0; 
 }
 
-.calendar-day.empty-day { background: #fafafa; }
-.day-number { font-weight: bold; font-size: 14px; align-self: flex-end; color: #000; margin-bottom: 2px; }
-.empty-day .day-number { color: #ccc; }
+.calendar-day.empty-day { 
+  background: var(--blank-bg, #fafafa); 
+  padding: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center; 
+  position: relative;
+  overflow: visible; /* Prevent any vertical bottom clipping globally */
+}
+/* Cascading sequential z-index completely stops adjacent 'white clipping' when grids bleed */
+.calendar-day.empty-day:nth-child(1) { z-index: 40; }
+.calendar-day.empty-day:nth-child(2) { z-index: 39; }
+.calendar-day.empty-day:nth-child(3) { z-index: 38; }
+.calendar-day.empty-day:nth-child(4) { z-index: 37; }
+.calendar-day.empty-day:nth-child(5) { z-index: 36; }
+.calendar-day.empty-day:nth-child(6) { z-index: 35; }
+.day-number { font-weight: bold; font-size: 14px; align-self: flex-end; color: var(--theme-text, #000); margin-bottom: 2px; }
+.empty-day .day-number { display: none; }
 
 /* Event Items */
 .events-container { 
@@ -163,29 +195,85 @@ input[type="text"], input[type="number"], select, textarea {
   display: flex; 
   flex-direction: column; 
   gap: 2px; 
+  min-height: 0; 
   overflow: hidden; 
 }
 
 .event { 
-  font-size: 9px; line-height: 1.1; cursor: pointer; padding: 2px 4px; border-radius: 2px;
-  word-break: break-word; color: #000; border: 1px solid transparent; transition: background 0.1s;
-  flex-shrink: 0;
+  padding: 2px 4px; 
+  border-radius: 3px; 
+  color: white; 
+  white-space: pre-wrap; 
+  word-break: break-word;
+  line-height: 1.15;
+  overflow: hidden; 
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-weight: 500;
 }
 
-.event.has-highlight { border: 1px solid rgba(0,0,0,0.15); font-weight: 600; }
-.event:hover { background-color: rgba(0,0,0,0.05); }
+.event:hover { opacity: 0.8; }
 .event.is-selected { background: rgba(59, 130, 246, 0.15) !important; outline: 1px solid #3b82f6; }
 
 /* Mini Calendars */
-.mini-cal-wrapper { font-size: 7px; margin-top: auto; border-top: 1px dashed #eee; padding-top: 4px; }
-.mini-calendar-title { font-weight: bold; font-size: 8px; text-align: center; margin-bottom: 2px; }
-.mini-calendar { width: 100%; border-collapse: collapse; text-align: center; }
-.mini-calendar th { color: #999; }
-.mini-calendar td { color: #444; font-family: monospace; }
+.mini-cal-wrapper { 
+  background: white;
+  border-radius: 3px;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.12);
+  padding: 3px;
+  margin: 3px auto auto auto;
+  width: 90%;
+  max-width: 140px;
+  position: relative;
+}
+.mini-calendar-title { 
+  font-weight: bold; 
+  font-size: 7px; 
+  text-align: center; 
+  margin-bottom: 2px; 
+  color: var(--theme-text, #333); 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px; 
+}
+.mini-calendar { width: 100%; border-collapse: collapse; text-align: center; margin: 0 auto; }
+.mini-calendar th { 
+  color: var(--theme-secondary, #999); 
+  font-size: 6px; 
+  padding-bottom: 2px; 
+  border-bottom: 1px solid var(--theme-border, #eee); 
+}
+.mini-calendar td { color: #444; font-weight: 600; font-family: 'Segoe UI', system-ui, sans-serif; padding: 1px; font-size: 7px; }
+
+/* Exact fit scaling for 6-row months */
+.mini-cal-wrapper.rows-6 { padding: 2px; }
+.rows-6 .mini-calendar-title { font-size: 6.5px; margin-bottom: 1px; }
+.rows-6 .mini-calendar th { font-size: 5px; padding-bottom: 1px; }
+.rows-6 .mini-calendar td { font-size: 6px; padding: 0.5px; }
+
+/* Portrait overrides */
+.print-container.portrait .mini-cal-wrapper { width: 96%; }
+.print-container.portrait .calendar-day.empty-day { overflow: visible; }
 
 @media print {
-  .no-print { display: none !important; }
-  .calendar-workspace { padding: 0; background: white; display: block; }
-  .print-container { width: 11in; height: 8.5in; box-shadow: none; margin: 0; border: none; }
-  @page { size: landscape; margin: 0; }
+  body, html, #root, .app-container {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+  .no-print, .sidebar { display: none !important; }
+  .calendar-workspace { padding: 0; margin: 0; background: white; display: block; overflow: visible !important; }
+  .print-container { box-shadow: none; margin: 0; border: none; overflow: visible !important; }
+
+  /* Browsers sometimes drop 1px lines when scaling up to fit PDF pages (sub-pixel rendering bug). 
+     Forcing the border exclusively to 1.5px or 2px while printing guarantees they're drawn. */
+  .calendar-grid {
+    border-top: 1.5px solid var(--theme-border, #ccc) !important;
+    border-left: 1.5px solid var(--theme-border, #ccc) !important;
+  }
+  .calendar-day, .day-label {
+    border-right: 1.5px solid var(--theme-border, #ccc) !important;
+    border-bottom: 1.5px solid var(--theme-border, #ccc) !important;
+  }
 }
